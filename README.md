@@ -2,9 +2,28 @@
 
 **Question:** Does moving computation (date logic + arithmetic) into tools improve numeric accuracy for an agent answering questions about personal running data?
 
-- Design A (`A_raw`): one `get_runs` tool returns raw rows; the LLM does the math.
-- Design B (`B_computed`): tools resolve dates and return pre-computed stats.
-- Same model, same system prompt, same 22 questions. Ground truth is computed independently in pandas (`ground_truth.py`).
+**Model:** Claude Haiku 4.5 for both designs, set in `config.py`. Override with `AGENT_MODEL` in `.env`.
+
+Same model, same system prompt, same 22 questions, same underlying data. Both designs start with only the question plus a system prompt giving today's date, the Monday–Sunday week rule, and the "average pace = total time / total distance" definition. The only difference is the tools (defined in `tools.py`):
+
+### Design A (`A_raw`): 1 tool, the LLM does the math
+| Tool | Input | Returns |
+|---|---|---|
+| `get_runs` | `start_date`, `end_date` (YYYY-MM-DD, inclusive) | One text line per run: date, miles, time (hh:mm:ss), avg pace (m:ss /mi), avg HR, ascent (ft) |
+
+The model must turn phrases like "last week" into dates itself, and do all counting, summing, averaging, filtering and comparing from the raw rows.
+
+### Design B (`B_computed`): 4 tools, code does the math
+| Tool | Input | Returns |
+|---|---|---|
+| `resolve_date_range` | a phrase: `this week`, `last week`, `this month`, `last month`, `this year`, `last N days` | JSON `start_date` / `end_date` (anything else returns an error) |
+| `summarize_period` | `start_date`, `end_date` | JSON: `num_runs`, `total_miles`, `avg_run_miles`, `longest_run_miles`, `avg_pace_min_per_mi` (distance-weighted, decimal), `fastest_run_pace_min_per_mi`, `avg_hr`, `total_ascent_ft` |
+| `compare_periods` | start/end for period A and period B | JSON with both periods' summaries plus `b_minus_a` differences |
+| `count_runs_over` | `min_miles` (strictly greater), `start_date`, `end_date` | JSON `count` |
+
+Design B never sees individual runs; the model only picks tools, passes dates, and reads off (or converts) the computed numbers.
+
+Ground truth is computed independently in pandas (`ground_truth.py`).
 
 ## Setup
 ```bash
