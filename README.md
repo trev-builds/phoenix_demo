@@ -14,7 +14,7 @@ cp .env.example .env     # fill in ANTHROPIC_API_KEY, PHOENIX_API_KEY, PHOENIX_C
 ```
 
 ## Data
-- Real: put your Garmin Connect CSV at `data/activities.csv`. Delete `AGENT_TODAY` from `.env` so "today" is real. Set `DISTANCE_UNIT=km` if your account is metric.
+- Real: put your Garmin Connect CSV at `data/activities.csv`. Delete `AGENT_TODAY` from `.env` so "today" is real.
 - Synthetic fallback: `python make_synthetic_data.py` (keep `AGENT_TODAY=2026-09-28` in `.env`).
 
 ## Run
