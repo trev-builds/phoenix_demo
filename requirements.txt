@@ -1,0 +1,8 @@
+pandas
+numpy
+anthropic
+arize-phoenix
+arize-phoenix-otel
+openinference-instrumentation-anthropic
+jupyter
+python-dotenv
